@@ -262,7 +262,7 @@ def rnn_backward(X, Y, parameters, cache):
     return gradients, a
 
 
-def model(data, num_iterations = 4500, n_a = 50, num_samples = 7, verbose = False):
+def model(data, num_iterations = 100000, n_a = 50, num_samples = 7, verbose = False):
     """
     Trains the model and generates dinosaur names. 
     
@@ -308,6 +308,7 @@ def model(data, num_iterations = 4500, n_a = 50, num_samples = 7, verbose = Fals
         idx = j % len(examples)
         
         X = [None] + [element_to_idx(ch) for ch in examples[idx]] #inputs to the RNN
+        #print(examples[idx], X, [str(x) for x in X[1:]])
         Y = X[1:] + [S.s_newline_id] #the targets it should be outputting
 
         # Perform one optimization step: Forward-prop -> Backward-prop -> Clip -> Update parameters
@@ -339,7 +340,7 @@ def model(data, num_iterations = 4500, n_a = 50, num_samples = 7, verbose = Fals
                 
                 # Sample indices and print them
                 sampled_indices = sample(parameters)
-                txt = ''.join(chr(ix) for ix in sampled_indices)
+                txt = ''.join(idx_to_element(ix) for ix in sampled_indices)
                 txt = txt[0].upper() + txt[1:]  # capitalize first character 
                 print ('%s' % (txt, ), end=',')
                 
@@ -351,12 +352,11 @@ def model(data, num_iterations = 4500, n_a = 50, num_samples = 7, verbose = Fals
 
 def main():
     with open("data.txt", "r") as data_file:
-        lines : list = [line.strip().split(',') + ['\n'] for line in data_file]
-        data : list = [item for sublist in lines for item in sublist]
+        data = data_file.read().lower()
         chars : list = sorted(set(data))
         data_size, S.s_vocab_size = len(data), len(chars)
         print('There are %d total characters and %d unique characters in your data.' % (data_size, S.s_vocab_size))
-        #s_newline_id = get_newline_id()
+        s_newline_id = get_newline_id()
 
         parameters = model(data, verbose = True)
 
